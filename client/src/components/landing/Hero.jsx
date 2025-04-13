@@ -6,7 +6,7 @@ export default function Hero() {
       <div className="flex flex-col w-1/2 px-8">
         <div className="flex flex-col text-5xl font-bold mb-4 h-48">
           <h1 className="text-accent">Upload your notes.</h1>
-          <h1>Get <span className="bg-gradient-to-r from-pink-500 to-yellow-500 bg-clip-text text-transparent font-semibold">AI-generated</span> flashcards</h1>
+          <h1>Get <span className="bg-gradient-to-r dark:from-pink-500 dark:to-yellow-500 from-cyan-500 to-green-400 bg-clip-text text-transparent font-semibold">AI-generated</span> flashcards</h1>
           <h1>and summaries — instantly.</h1>
         </div>
         <p className="text-xl mb-4 text-muted-foreground">
