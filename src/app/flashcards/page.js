@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
 export default function FlashcardsPage() {
@@ -29,21 +29,38 @@ export default function FlashcardsPage() {
     setShowAnswer((prev) => !prev);
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setShowAnswer(false);
     setCurrentIndex((prev) => (prev + 1) % flashcards.length);
-  };
+  }, [flashcards.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     setShowAnswer(false);
-    setCurrentIndex(
-      (prev) => (prev - 1 + flashcards.length) % flashcards.length
-    );
-  };
+    setCurrentIndex((prev) => (prev - 1 + flashcards.length) % flashcards.length);
+  }, [flashcards.length]);
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "ArrowRight") {
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        handlePrevious();
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); // Prevent scrolling when space is pressed
+        handleCardClick();
+      }
+    },
+    [handleNext, handlePrevious]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   if (flashcards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <div className="flex flex-col items-center justify-center max-h-screen p-8">
         <h1 className="text-4xl font-bold mb-8">Flashcards</h1>
         <p className="text-foreground">No flashcards available</p>
       </div>
@@ -65,8 +82,8 @@ export default function FlashcardsPage() {
 
       <h1 className="text-4xl font-bold mb-8">Flashcards</h1>
 
-      {/* Center content with flex-grow */}
       <div className="flex flex-col items-center justify-center flex-grow p-4">
+        {/* Flashcard */}
         <div
           className="cursor-pointer p-8 border rounded-lg shadow-md max-w-xl text-center bg-card border-border"
           onClick={handleCardClick}
@@ -77,20 +94,29 @@ export default function FlashcardsPage() {
           ) : (
             <p className="text-sm text-muted-foreground">Click to reveal answer</p>
           )}
+
+          {/* Hint: Flip instruction */}
+          <p className="text-xs text-muted-foreground mt-6">
+            Press <kbd className="px-1 py-0.5 border rounded">Enter</kbd> or{" "}
+            <kbd className="px-1 py-0.5 border rounded">Space</kbd> to flip the card
+          </p>
         </div>
 
+        {/* Navigation Buttons */}
         <div className="mt-8 flex space-x-4">
           <button
             onClick={handlePrevious}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80 flex items-center space-x-1"
           >
-            Previous
+            <span>←</span>
+            <span>Previous</span>
           </button>
           <button
             onClick={handleNext}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80 flex items-center space-x-1"
           >
-            Next
+            <span>Next</span>
+            <span>→</span>
           </button>
         </div>
       </div>
