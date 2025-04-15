@@ -18,38 +18,8 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="flex justify-center items-center w-1/2 p-6 bg-muted rounded-lg shadow-xl space-y-8">
-        <div className="w-full space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-xl font-semibold mb-3 text-primary-foreground">
-                Feature 1
-              </h3>
-              <p className="text-muted-foreground">
-                This is a brief description of feature 1, highlighting its key
-                benefits in a simple and clean format.
-              </p>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-xl font-semibold mb-3 text-primary-foreground">
-                Feature 2
-              </h3>
-              <p className="text-muted-foreground">
-                This feature provides a practical solution to common problems,
-                aiming to improve productivity and efficiency.
-              </p>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-xl font-semibold mb-3 text-primary-foreground">
-                Feature 3
-              </h3>
-              <p className="text-muted-foreground">
-                The third feature is designed to enhance the user experience,
-                providing flexibility and ease of use across different devices.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center items-center w-1/2 p-6">
+        
       </div>
     </div>
   );

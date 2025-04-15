@@ -1,7 +1,15 @@
 {
   "compilerOptions": {
+    "baseUrl": ".", // Set the base URL to the root directory
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"] // Alias to the 'src' directory (if you have one)
     }
-  }
+  },
+  "include": [
+    "src/**/*", // Include everything from the 'src' directory
+    "**/*.ts", // Include all TypeScript files (if you're using them)
+    "**/*.tsx", // Include all TSX files (if you're using them)
+    "**/*.js", // Include all JavaScript files
+    "**/*.jsx" // Include all JSX files (if you're using them)
+  ]
 }
