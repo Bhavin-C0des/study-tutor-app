@@ -104,7 +104,7 @@ export default function UploadPage() {
         return;
       }
 
-      router.push("/results");
+      router.push("/summary");
     } catch (error) {
       console.error("Overall error:", error);
       alert("An unexpected error occurred. Please try again.");
