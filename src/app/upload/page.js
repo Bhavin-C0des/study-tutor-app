@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { saveNotesToLocalStorage, convertFileToText } from "@/lib/storageUtils";
-import { Upload, TextIcon, FileText, UploadCloud } from "lucide-react";
+import { Upload, TextIcon, FileText, UploadCloud, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function UploadPage() {
   const [mode, setMode] = useState("file");
   const [file, setFile] = useState(null);
   const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleFileChange = (e) => {
@@ -23,9 +25,7 @@ export default function UploadPage() {
     }
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
+  const handleDragOver = (e) => e.preventDefault();
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -37,77 +37,55 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
+    setIsLoading(true);
     let notes = "";
-    if (mode === "file" && file) {
-      try {
-        notes = await convertFileToText(file);
-      } catch (error) {
-        console.error("Error converting file:", error);
-        alert("Error converting file. Please try again.");
-        return;
-      }
-    } else if (mode === "text" && inputText.trim() !== "") {
-      notes = inputText;
-    }
 
-    console.log("Input Notes:", notes); // Log input notes
+    // Show loading toast and save its ID
+    const toastId = toast.loading("Uploading and processing your notes...");
 
     try {
-      // Generate flashcards
-      try {
-        console.log("Sending request to /api/generateFlashcards"); // Log API request
-        const flashcardsResponse = await fetch("/api/generateFlashcards", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text: notes }),
-        });
-
-        if (!flashcardsResponse.ok) {
-          const errorText = await flashcardsResponse.text();
-          console.error("Flashcards API error:", flashcardsResponse.status, errorText);
-          throw new Error(`Flashcards API error: ${flashcardsResponse.status} - ${errorText}`);
-        }
-
-        const flashcardsData = await flashcardsResponse.json();
-        console.log("Flashcards Data:", flashcardsData); // Log flashcards data
-        localStorage.setItem("flashcards", JSON.stringify(flashcardsData.flashcards));
-      } catch (error) {
-        console.error("Error generating flashcards:", error);
-        alert("Error generating flashcards. Please try again.");
-        return;
+      if (mode === "file" && file) {
+        notes = await convertFileToText(file);
+      } else if (mode === "text" && inputText.trim() !== "") {
+        notes = inputText;
       }
 
-      // Generate summary
-      try {
-        const summaryResponse = await fetch("/api/generateSummary", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text: notes }),
-        });
+      // Flashcards
+      const flashcardsRes = await fetch("/api/generateFlashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: notes }),
+      });
 
-        if (!summaryResponse.ok) {
-          const errorText = await summaryResponse.text();
-          console.error("Summary API error:", summaryResponse.status, errorText);
-          throw new Error(`Summary API error: ${summaryResponse.status} - ${errorText}`);
-        }
+      if (!flashcardsRes.ok) throw new Error("Flashcards generation failed.");
+      const flashcardsData = await flashcardsRes.json();
+      localStorage.setItem("flashcards", JSON.stringify(flashcardsData.flashcards));
 
-        const summaryData = await summaryResponse.json();
-        console.log("Summary:", summaryData.summary);
-        localStorage.setItem("summary", JSON.stringify(summaryData.summary));
-      } catch (error) {
-        console.error("Error generating summary:", error);
-        alert("Error generating summary. Please try again.");
-        return;
-      }
+      // Summary
+      const summaryRes = await fetch("/api/generateSummary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: notes }),
+      });
 
-      router.push("/summary");
+      if (!summaryRes.ok) throw new Error("Summary generation failed.");
+      const summaryData = await summaryRes.json();
+      localStorage.setItem("summary", JSON.stringify(summaryData.summary));
+
+      // Dismiss loading and show success
+      toast.dismiss(toastId);
+      toast.success("Notes uploaded and processed successfully!");
+
+      // Wait a bit before navigating
+      setTimeout(() => {
+        setIsLoading(false);
+        router.push("/summary");
+      }, 1500); // Adjust delay to your liking
     } catch (error) {
-      console.error("Overall error:", error);
-      alert("An unexpected error occurred. Please try again.");
+      toast.dismiss(toastId);
+      toast.error("Something went wrong. Please try again.");
+      console.error("Upload error:", error);
+      setIsLoading(false);
     }
   };
 
@@ -126,37 +104,25 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-background p-8 pt-20">
-      {/* Improved Page Header */}
       <div className="max-w-5xl mx-auto mb-8 text-center">
-        <h2 className="text-4xl font-bold text-secondary-foreground">
-          Upload Page
-        </h2>
+        <h2 className="text-4xl font-bold text-secondary-foreground">Upload Page</h2>
         <p className="mt-2 text-lg text-foreground">
           Select or drag & drop your file, or paste your notes.
         </p>
       </div>
 
-      {/* Main Card */}
       <div className="max-w-5xl mx-auto bg-card shadow-lg rounded-xl overflow-hidden flex flex-col md:flex-row">
-        {/* Left Panel */}
         <div className="w-full md:w-2/3 p-6 space-y-4">
-          {/* Adjusted Heading */}
           <h1 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">
             Upload Your Notes
           </h1>
 
-          <Tabs defaultValue="file" onValueChange={onTabChange} aria-label="Upload Options">
+          <Tabs defaultValue="file" onValueChange={onTabChange}>
             <TabsList className="flex justify-center space-x-4">
-              <TabsTrigger
-                value="file"
-                className="px-4 py-2 text-lg font-medium hover:bg-accent/10 rounded-lg"
-              >
+              <TabsTrigger value="file" className="px-4 py-2 text-lg font-medium hover:bg-accent/10 rounded-lg">
                 Upload File
               </TabsTrigger>
-              <TabsTrigger
-                value="text"
-                className="px-4 py-2 text-lg font-medium hover:bg-accent/10 rounded-lg"
-              >
+              <TabsTrigger value="text" className="px-4 py-2 text-lg font-medium hover:bg-accent/10 rounded-lg">
                 Paste Notes
               </TabsTrigger>
             </TabsList>
@@ -164,16 +130,14 @@ export default function UploadPage() {
             <TabsContent value="file">
               <label
                 htmlFor="file-upload"
-                className="mt-4 block border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-muted transition animate-pulse"
+                className="mt-4 block border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-muted transition"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
               >
                 {file ? (
                   <p className="text-foreground font-medium">{file.name}</p>
                 ) : (
-                  <p className="text-muted-foreground">
-                    Click or drag & drop to select a file
-                  </p>
+                  <p className="text-muted-foreground">Click or drag & drop to select a file</p>
                 )}
                 <Input
                   id="file-upload"
@@ -199,19 +163,25 @@ export default function UploadPage() {
             <div className="flex justify-center mt-3">
               <Button
                 onClick={handleUpload}
+                disabled={isLoading}
                 className="bg-accent hover:bg-accent/80 text-accent-foreground px-6 py-3 rounded-full shadow-md"
               >
-                Upload
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Upload"
+                )}
               </Button>
             </div>
           )}
         </div>
 
-        {/* Right Panel remains fixed */}
+        {/* Instructions */}
         <div className="w-full md:w-1/3 bg-popover p-8 sticky top-0">
-          <h3 className="text-2xl font-semibold text-foreground mb-4">
-            How to Upload
-          </h3>
+          <h3 className="text-2xl font-semibold text-foreground mb-4">How to Upload</h3>
           <ol className="space-y-4 text-foreground list-decimal pl-5">
             <li className="flex items-center">
               <span className="mr-3 text-accent">
@@ -229,13 +199,13 @@ export default function UploadPage() {
               <span className="mr-3 text-accent">
                 <UploadCloud className="inline-block w-5 h-5 mr-1" />
               </span>
-              Drag & drop your file into the designated area.
+              Drag & drop your file into the area.
             </li>
             <li className="flex items-center">
               <span className="mr-3 text-accent">
                 <Upload className="inline-block w-5 h-5 mr-1" />
               </span>
-              Click "Upload" to process your notes.
+              Click "Upload" to start processing.
             </li>
           </ol>
         </div>

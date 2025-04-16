@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image"; // Import Image from Next.js
+import Link from "next/link"; // Import Link from Next.js
 
 export default function Hero() {
   return (
