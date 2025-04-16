@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image"; // Import Image from Next.js
 
 export default function Hero() {
   return (
@@ -18,8 +19,15 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="flex justify-center items-center w-1/2 p-6">
-        
+      <div className="flex justify-center items-center w-1/2 p-6 mt-16">
+        {/* Add the hero-image here */}
+        <Image 
+          src="/hero-image.png" 
+          alt="Hero Image" 
+          width={600}  // You can adjust the width as needed
+          height={450} // Adjust the height as needed
+          className="rounded-lg"  // Optional: Add any styling you want
+        />
       </div>
     </div>
   );
