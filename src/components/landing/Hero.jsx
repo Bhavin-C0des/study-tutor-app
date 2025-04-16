@@ -16,7 +16,10 @@ export default function Hero() {
           the work, you get the grade.
         </p>
         <div>
-          <Button variant="accent">Get Started</Button>
+          {/* Wrap the Button inside a Link component to navigate */}
+          <Link href="/upload">
+            <Button variant="accent">Get Started</Button>
+          </Link>
         </div>
       </div>
 
