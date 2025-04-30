@@ -19,9 +19,9 @@ export async function POST(req) {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     
     const prompt = `
-You are an AI study tutor in my SaaS that creates flashcards for students.
+You are an AI study tutor in my SaaS that creates flashcards for MYP students.
 I will provide you with some notes uploaded by the student, and you will create flashcards based on them to help the student revise and study their notes properly.
-Include questions on definitions, concepts, processes, and any other relevant information that can be turned into a question.
+Include questions on definitions, concepts, processes, and any other relevant information that can be turned into a question. Make this for an MYP student to score better in their MYP assessments based on the MYP crteria of that subject. Do not mention the criteria or anything in the respones, just base it on each of the criterions that you search up based on the subject for MYP. Don't only focus on the factual content like in criterion A for science. Give an equal amount of weightage for all the criteria (ex - Real life application in Maths for criteria D, variables in research for criteria B in science or real-life application for criteria D in science, etc.)
 Please return ONLY the flashcards in the following JSON format (do not add any markdown formatting or extra text):
 {
   "flashcards": [
